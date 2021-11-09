@@ -14,5 +14,5 @@ def ssh_admin():
 
 @pytest.fixture(scope="session")
 def ssh_root():
-    ssh_root = SshNbUtils(ip="10.10.20.12", user="smartroot", pw="314740193099")
+    ssh_root = SshNbUtils(ip="10.10.50.133", user="smartroot", pw="314740193099")
     return ssh_root

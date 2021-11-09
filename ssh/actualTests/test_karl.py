@@ -1,4 +1,4 @@
-
+import re
 import sys
 sys.path.append('/home/kalle/Python/ssh/')
 sys.path.append('/home/kalle/Python/ssh/ssh_so')
@@ -18,6 +18,14 @@ def test_2(ssh_admin):
     print(result_list[1])
 
 
-def test_3(ssh_root):
-    result = ssh_root.cmd(cmd_list=["cat /var/log/error.log\n"])[0]
+def test_3():
+    ssh_nb = SshNbUtils(ip="10.10.50.133", user="smartroot", pw="314740193099")
+    result = ssh_nb.cmd(slot2=True, sudo=True, cmd_list=["tiny_dh_client -d /tmp/device_handlers/qsfp/0 -c get -a data/fec/berCounters"])[0]
+    result = re.findall(pattern=r'/d[.]/d+', string=result) #, re.findall(pattern=r'/d[.]/d/d/d/d'string=result)
+    print(result)
+
+
+def torr_sim_test_1():
+    result = ["tiny_dh_client -d /tmp/device_handlers/qsfp/0 -c get -a data/fec/berCounters"]
+    result = re.findall(pattern=r'/d[.]/d+', string=result)
     print(result)

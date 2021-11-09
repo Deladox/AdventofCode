@@ -21,6 +21,9 @@ class SshNbUtils:
         cmd_list,
         break_list=None,
         break_prompt_re=True,
+        slot1=False,
+        slot2=False,
+        sudo=False,
         clear_buffer=True,
         connect_timeout=10,
     ):
@@ -52,6 +55,14 @@ class SshNbUtils:
         if clear_buffer is True:
             ssh2.clear_buffer(ch=ch, break_prompt_re_list=prompts_regex_list)
 
+        # ssh slot
+        if slot1 or slot2:
+            self.__slot(ssh2=ssh2, ch=ch, slot1=slot1, slot2=slot2)
+
+        # sudo
+        if sudo:
+            self.__sudo(ssh2=ssh2, ch=ch, sudo=sudo)
+
         # run cmd's
         for pos, cmd in enumerate(cmd_list):
             break_str = break_list[pos] if break_list else None
@@ -61,5 +72,38 @@ class SshNbUtils:
         ssh2.close_session(session=session)
 
         return result_list
+
+
+    def __slot(self, ssh2, ch, slot1=False, slot2=False):
+
+        slot_no = "1" if slot1 else "2"
+        if slot1 or slot2:
+
+            # no.1
+            cmd = f"ssh{str(slot_no)}\n"
+            break_list = ["Password:", "password:", "traffic_module device handler doesn't exist"]
+            result = ssh2.cmd(ch=ch, cmd=cmd, break_list=break_list)
+
+            # no.2 "a"
+            cmd = f"{self.pw}\n"
+            break_list = ["Password:", "password:", "Are you sure you want to continue connecting (yes/no)?"]
+            result = ssh2.cmd(ch=ch, cmd=cmd, break_list=break_list)
+
+            # no.2 "b" - (after an factorydefault, upgrade etc.)
+            if "Are you sure you want to continue connecting (yes/no)?" in result:
+                cmd = "yes\n"
+                break_list = ["Password:", "password:"]
+                ssh2.cmd(ch=ch, cmd=cmd, break_list=break_list)
+
+            # no.3
+            cmd = f"{self.pw}\n"
+            ssh2.cmd(ch=ch, cmd=cmd, break_prompt_re_list=prompts_regex_list)
+
+    def __sudo(self, ssh2, ch, sudo=False):
+        if sudo:
+            exp_root = "Password:"
+            exp_bash = "password for test.script:"
+            ssh2.cmd(ch=ch, cmd="sudo -s\n", break_list=[exp_root, exp_bash])
+            ssh2.cmd(ch=ch, cmd=f"{self.pw}\n", break_prompt_re_list=prompts_regex_list)
 
 
