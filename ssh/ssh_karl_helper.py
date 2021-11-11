@@ -68,6 +68,9 @@ class SshNbUtils:
             break_str = break_list[pos] if break_list else None
             prompts_regex_list_ = prompts_regex_list if break_prompt_re is True else None
             data = ssh2.cmd(ch=ch, cmd=cmd, break_str=break_str, break_prompt_re_list=prompts_regex_list_)
+            if data == "\r\n\r\nThis command can be service interrupting.\r\nAre you sure you want to continue? (Yes/NO):":
+                cmd = "yes\n"
+                ssh2.cmd(ch=ch, cmd = cmd)
             result_list.append(data)
         ssh2.close_session(session=session)
 
